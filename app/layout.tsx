@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     "A beginner-friendly tutorial: record real API traffic from a Gin + MongoDB app with Keploy and replay it as tests, with no test code written.",
 };
 
-const REPO_URL = "https://github.com/mukund2910/keploy-gin-mongo-guide";
+const REPO_URL = "https://github.com/Mukund2910/keploy-gin-mongo-guide";
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
