@@ -1,23 +1,19 @@
-import { Tabs, Tab } from "@/components/client";
-import { Callout, Card, Cards, FileTree, RecordReplayDiagram, Step, Steps } from "@/components/docs";
+import { SessionDemo, Tabs, Tab } from "@/components/client";
+import { Callout, FileTree, RecordReplayDiagram, Step, Steps } from "@/components/docs";
 
-<p className="not-prose mb-3 text-sm font-medium text-orange-600 dark:text-orange-400">Tutorial · Go · ~20 minutes</p>
+# Your first Keploy tests in Go
 
-# Your first Keploy tests in Go: a Gin + MongoDB walkthrough
+<p className="mt-4! font-sans text-[1.0625rem] text-muted">A 20-minute walkthrough with a Gin + MongoDB URL shortener.</p>
 
 You have a Go API. It talks to a database. You know you *should* have integration tests, but writing them means
 spinning up Mongo in CI, seeding data, hand-writing request/response assertions, and keeping all of it in sync
 with the code. So it doesn't happen.
 
-This guide shows a different approach. We'll take a small URL-shortener built with **Gin** and **MongoDB**, use it
-the way a user would (a couple of `curl` calls), and let **Keploy** turn that traffic into tests that run
-**without a database**. No test code written.
+This guide takes a different route. You'll use a small app the way a client would, with two `curl` calls, and
+let **Keploy** turn that traffic into tests that run **without a database**. You won't write any test code.
+Here's the whole idea in one session:
 
-<Cards>
-  <Card icon="🎥" title="Record">Keploy watches real API calls and the database queries they trigger.</Card>
-  <Card icon="📼" title="Store">Each call becomes a YAML test case; each DB reply becomes a mock.</Card>
-  <Card icon="▶️" title="Replay">Re-run the calls against new code; Keploy answers DB queries from the mocks.</Card>
-</Cards>
+<SessionDemo />
 
 <Callout type="info" title="Who this is for">
   You're comfortable with Go and the terminal, have used Docker before, and have **never touched Keploy**. You

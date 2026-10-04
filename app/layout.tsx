@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { IBM_Plex_Mono, IBM_Plex_Sans, Source_Serif_4 } from "next/font/google";
 import { ReadingProgress, Toc } from "@/components/client";
 import { ThemeProvider, ThemeToggle } from "@/components/theme";
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const plexSans = IBM_Plex_Sans({ variable: "--font-plex-sans", subsets: ["latin"], weight: ["400", "500", "600"] });
+const plexMono = IBM_Plex_Mono({ variable: "--font-plex-mono", subsets: ["latin"], weight: ["400", "500"] });
+const serif = Source_Serif_4({ variable: "--font-serif4", subsets: ["latin"], style: ["normal", "italic"] });
 
 export const metadata: Metadata = {
-  title: "Your First Keploy Tests in Go · Gin + MongoDB",
+  title: "Your first Keploy tests in Go (Gin + MongoDB)",
   description:
     "A beginner-friendly tutorial: record real API traffic from a Gin + MongoDB app with Keploy and replay it as tests, with no test code written.",
 };
@@ -17,36 +18,32 @@ const REPO_URL = "https://github.com/Mukund2910/keploy-gin-mongo-guide";
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-      <body className="min-h-screen bg-white font-sans text-zinc-800 dark:bg-zinc-950 dark:text-zinc-300">
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${plexSans.variable} ${plexMono.variable} ${serif.variable} antialiased`}
+    >
+      <body className="min-h-screen font-sans">
         <ThemeProvider>
-          <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80">
-            <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
-              <a href="#" className="flex items-center gap-2 font-semibold text-zinc-900 dark:text-zinc-100">
-                <span className="grid size-7 place-items-center rounded-md bg-gradient-to-br from-orange-500 to-amber-400 text-sm text-white">
-                  K
-                </span>
-                <span className="hidden sm:inline">Keploy Go Guide</span>
+          <a
+            href="#content"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-50 focus:rounded focus:bg-panel focus:px-3 focus:py-2"
+          >
+            Skip to content
+          </a>
+
+          <header className="sticky top-0 z-30 border-b border-rule bg-paper/90 backdrop-blur">
+            <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4 sm:px-6">
+              <a href="#" className="flex items-baseline gap-2 text-[0.95rem] text-ink">
+                <span className="font-semibold">keploy</span>
+                <span className="text-muted">Go field guide</span>
               </a>
-              <span className="rounded-full border border-zinc-200 px-2 py-0.5 text-xs text-zinc-500 dark:border-zinc-800">
-                Gin + MongoDB
-              </span>
-              <nav className="ml-auto flex items-center gap-1 text-sm">
-                <a
-                  href="https://keploy.io/docs/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hidden rounded-lg px-3 py-2 text-zinc-600 hover:text-zinc-900 sm:block dark:text-zinc-400 dark:hover:text-zinc-100"
-                >
-                  Keploy Docs
+              <nav className="ml-auto flex items-center gap-5 text-sm text-muted">
+                <a href="https://keploy.io/docs/" target="_blank" rel="noreferrer" className="hidden hover:text-ink sm:inline">
+                  Keploy docs
                 </a>
-                <a
-                  href={REPO_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-lg px-3 py-2 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-                >
-                  GitHub
+                <a href={REPO_URL} target="_blank" rel="noreferrer" className="hover:text-ink">
+                  Source
                 </a>
                 <ThemeToggle />
               </nav>
@@ -54,22 +51,25 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <ReadingProgress />
           </header>
 
-          <div className="mx-auto flex max-w-6xl gap-12 px-4 py-10 sm:px-6 lg:py-14">
-            <article className="prose prose-zinc min-w-0 max-w-3xl flex-1 dark:prose-invert prose-headings:scroll-mt-20 prose-headings:tracking-tight prose-h2:mt-14 prose-h2:border-t prose-h2:border-zinc-200 prose-h2:pt-10 dark:prose-h2:border-zinc-800 prose-a:text-orange-600 prose-a:no-underline hover:prose-a:underline dark:prose-a:text-orange-400">
-              {children}
-            </article>
-            <aside className="hidden w-56 shrink-0 lg:block">
-              <div className="sticky top-24">
+          <div className="mx-auto grid max-w-6xl gap-x-16 px-4 sm:px-6 lg:grid-cols-[13rem_minmax(0,1fr)]">
+            <aside className="hidden lg:block">
+              <div className="sticky top-24 py-12">
                 <Toc />
               </div>
             </aside>
+            <main id="content" className="min-w-0 pb-24 pt-12 lg:pt-16">
+              <article className="doc">{children}</article>
+            </main>
           </div>
 
-          <footer className="border-t border-zinc-200 py-8 text-center text-sm text-zinc-500 dark:border-zinc-800">
-            Written with Next.js + MDX · Sample app from{" "}
-            <a className="underline" href="https://github.com/keploy/samples-go/tree/main/gin-mongo" target="_blank" rel="noreferrer">
-              keploy/samples-go
-            </a>
+          <footer className="border-t border-rule">
+            <div className="mx-auto max-w-6xl px-4 py-8 text-sm text-muted sm:px-6">
+              Built with Next.js and MDX. The sample app is{" "}
+              <a className="text-go underline underline-offset-2" href="https://github.com/keploy/samples-go/tree/main/gin-mongo" target="_blank" rel="noreferrer">
+                keploy/samples-go/gin-mongo
+              </a>
+              .
+            </div>
           </footer>
         </ThemeProvider>
       </body>

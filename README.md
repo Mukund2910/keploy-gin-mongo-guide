@@ -4,17 +4,19 @@ A single-page, beginner-friendly tutorial that walks through Keploy's
 [Gin + MongoDB quickstart](https://keploy.io/docs/quickstart/samples-gin/): record real API traffic,
 inspect the generated YAML tests and mocks, replay them without a database, and catch a regression.
 
-Built with **Next.js 16 (App Router) + MDX**, styled with **Tailwind CSS v4** and `@tailwindcss/typography`.
+Built with **Next.js 16 (App Router) + MDX** and **Tailwind CSS v4**. Type is IBM Plex Sans / Plex Mono for UI and code,
+with Source Serif 4 for the long-form body. Colour is semantic: red marks recording, green marks replay.
 
 ## Features
 
+- An animated record-then-replay terminal session in the hero (respects `prefers-reduced-motion`)
 - Tutorial content lives in [`app/page.mdx`](app/page.mdx), with Markdown and React components mixed together
 - Syntax highlighting via `rehype-pretty-code` (Shiki) with dual light/dark themes, file titles and line highlights
 - Custom MDX components: `<Callout>` (info / tip / warning / a-ha), `<Steps>`, `<Tabs>`, `<FileTree>`,
-  `<Cards>` and a record-vs-replay diagram
+  and a record-vs-replay diagram
 - Copy-to-clipboard on every code block
 - Dark/light mode toggle (`next-themes`, follows the system by default)
-- Sticky table of contents with scroll-spy, and a reading progress bar
+- A contents rail that tracks how far through the tutorial you are, plus a reading progress bar
 - Fully static output (`○ /` prerendered)
 
 ## Run locally
@@ -33,8 +35,8 @@ app/
   layout.tsx      # header, theme toggle, TOC sidebar
   globals.css     # Tailwind + code block / steps styles
 components/
-  docs.tsx        # server components used in MDX (Callout, Steps, Cards, diagram...)
-  client.tsx      # interactive pieces (Tabs, copy button, TOC, progress bar)
+  docs.tsx        # server components used in MDX (Callout, Steps, FileTree, diagram)
+  client.tsx      # interactive pieces (session demo, Tabs, copy button, contents rail, progress)
   theme.tsx       # theme provider + toggle
 mdx-components.tsx  # global MDX element overrides
 next.config.ts      # @next/mdx + remark/rehype plugins
