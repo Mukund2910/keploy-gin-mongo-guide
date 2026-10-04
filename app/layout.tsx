@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans, Source_Serif_4 } from "next/font/google";
-import { ReadingProgress, Toc } from "@/components/client";
+import { ReadingProgress, Reveal, Toc } from "@/components/client";
 import { ThemeProvider, ThemeToggle } from "@/components/theme";
 import "./globals.css";
 
@@ -32,18 +32,21 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             Skip to content
           </a>
 
-          <header className="sticky top-0 z-30 border-b border-rule bg-paper/90 backdrop-blur">
-            <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4 sm:px-6">
-              <a href="#" className="flex items-baseline gap-2 text-[0.95rem] text-ink">
-                <span className="font-semibold">keploy</span>
-                <span className="text-muted">Go field guide</span>
+          <header className="sticky top-0 z-30 border-b border-rule bg-paper/80 backdrop-blur-md">
+            <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
+              <a href="#" className="group flex items-center gap-2.5 text-[0.95rem] font-semibold text-ink">
+                <span className="grid size-7 place-items-center rounded-lg bg-gradient-to-br from-orange-500 to-amber-400 text-sm text-white shadow-md shadow-orange-500/30 transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
+                  K
+                </span>
+                <span className="hidden sm:inline">Keploy Go Guide</span>
               </a>
-              <nav className="ml-auto flex items-center gap-5 text-sm text-muted">
-                <a href="https://keploy.io/docs/" target="_blank" rel="noreferrer" className="hidden hover:text-ink sm:inline">
+              <span className="rounded-full border border-rule px-2.5 py-0.5 text-xs text-muted">Gin + MongoDB</span>
+              <nav className="ml-auto flex items-center gap-1 text-sm text-muted">
+                <a href="https://keploy.io/docs/" target="_blank" rel="noreferrer" className="hidden rounded-lg px-3 py-2 transition-colors hover:bg-sunk hover:text-ink sm:inline">
                   Keploy docs
                 </a>
-                <a href={REPO_URL} target="_blank" rel="noreferrer" className="hover:text-ink">
-                  Source
+                <a href={REPO_URL} target="_blank" rel="noreferrer" className="rounded-lg px-3 py-2 transition-colors hover:bg-sunk hover:text-ink">
+                  GitHub
                 </a>
                 <ThemeToggle />
               </nav>
@@ -59,13 +62,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </aside>
             <main id="content" className="min-w-0 pb-24 pt-12 lg:pt-16">
               <article className="doc">{children}</article>
+              <Reveal />
             </main>
           </div>
 
           <footer className="border-t border-rule">
             <div className="mx-auto max-w-6xl px-4 py-8 text-sm text-muted sm:px-6">
               Built with Next.js and MDX. The sample app is{" "}
-              <a className="text-go underline underline-offset-2" href="https://github.com/keploy/samples-go/tree/main/gin-mongo" target="_blank" rel="noreferrer">
+              <a className="text-accent underline underline-offset-2" href="https://github.com/keploy/samples-go/tree/main/gin-mongo" target="_blank" rel="noreferrer">
                 keploy/samples-go/gin-mongo
               </a>
               .

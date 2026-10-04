@@ -1,10 +1,30 @@
 /* Server components used inside the MDX tutorial. */
 
 const callouts = {
-  info: { bar: "border-go", label: "text-go", title: "Note" },
-  tip: { bar: "border-pass", label: "text-pass", title: "Tip" },
-  warning: { bar: "border-warn", label: "text-warn", title: "Watch out" },
-  aha: { bar: "border-ink", label: "text-ink", title: "Why this matters" },
+  info: {
+    box: "border-sky-200 bg-sky-50 dark:border-sky-900/60 dark:bg-sky-950/40",
+    icon: "text-sky-600 dark:text-sky-400",
+    title: "Note",
+    path: "M12 16v-4M12 8h.01",
+  },
+  tip: {
+    box: "border-emerald-200 bg-emerald-50 dark:border-emerald-900/60 dark:bg-emerald-950/40",
+    icon: "text-emerald-600 dark:text-emerald-400",
+    title: "Tip",
+    path: "M9 12l2 2 4-4",
+  },
+  warning: {
+    box: "border-amber-200 bg-amber-50 dark:border-amber-900/60 dark:bg-amber-950/40",
+    icon: "text-amber-600 dark:text-amber-400",
+    title: "Watch out",
+    path: "M12 8v4M12 16h.01",
+  },
+  aha: {
+    box: "border-violet-200 bg-violet-50 dark:border-violet-900/60 dark:bg-violet-950/40",
+    icon: "text-violet-600 dark:text-violet-400",
+    title: "Why this matters",
+    path: "M12 7v5l3 2",
+  },
 } as const;
 
 export function Callout({
@@ -19,10 +39,23 @@ export function Callout({
   const c = callouts[type];
   return (
     <aside
-      className={`my-8! border-l-[3px] bg-sunk/60 py-3.5 pl-5 pr-5 text-[1.02rem] leading-relaxed ${c.bar} [&_code]:font-mono [&_code]:text-[0.84em] [&_p+p]:mt-2`}
+      className={`group my-8! flex gap-3 rounded-xl border p-4 text-[1.02rem] leading-relaxed transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 ${c.box}`}
     >
-      <p className={`mb-1 font-sans text-[0.9rem] font-semibold ${c.label}`}>{title ?? c.title}</p>
-      <div className="[&_a]:text-go [&_a]:underline">{children}</div>
+      <svg
+        viewBox="0 0 24 24"
+        className={`mt-1 size-5 shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[-8deg] ${c.icon}`}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <path d={c.path} />
+      </svg>
+      <div className="min-w-0 text-zinc-700 dark:text-zinc-300 [&_a]:text-accent [&_a]:underline [&_code]:rounded [&_code]:bg-black/5 [&_code]:px-1 [&_code]:font-mono [&_code]:text-[0.84em] dark:[&_code]:bg-white/10 [&_p+p]:mt-2">
+        <p className="mb-1 font-sans text-[0.92rem] font-semibold text-zinc-900 dark:text-zinc-100">{title ?? c.title}</p>
+        {children}
+      </div>
     </aside>
   );
 }
@@ -43,7 +76,7 @@ export function Step({ title, children }: { title: string; children: React.React
 
 export function FileTree({ children }: { children: string }) {
   return (
-    <pre className="my-6! overflow-x-auto rounded-md border border-rule bg-panel px-5 py-4 font-mono text-[0.84rem] leading-6 text-ink">
+    <pre className="my-6! overflow-x-auto rounded-xl border border-rule bg-sunk/60 px-5 py-4 font-mono text-[0.84rem] leading-6 text-ink transition-colors hover:border-accent/50">
       {children.trim()}
     </pre>
   );
@@ -53,7 +86,7 @@ export function FileTree({ children }: { children: string }) {
 export function RecordReplayDiagram() {
   return (
     <figure className="my-10! font-sans text-[0.85rem]">
-      <div className="grid gap-px overflow-hidden rounded-md border border-rule bg-rule sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Lane
           tone="rec"
           heading="keploy record"
@@ -80,7 +113,7 @@ export function RecordReplayDiagram() {
           ]}
         />
       </div>
-      <figcaption className="mt-3 font-serif text-[0.95rem] italic text-muted">
+      <figcaption className="mt-3 text-center font-serif text-[0.95rem] italic text-muted">
         Record once against the real database, then replay as often as you like without it.
       </figcaption>
     </figure>
@@ -96,27 +129,43 @@ function Lane({
   heading: string;
   rows: [string, "plain" | "edge" | "keploy" | "gone"][];
 }) {
-  const accent = tone === "rec" ? "border-rec text-rec" : "border-pass text-pass";
+  const t =
+    tone === "rec"
+      ? { text: "text-rec", bar: "border-rec", bg: "bg-rec/8", dot: "bg-rec" }
+      : { text: "text-pass", bar: "border-pass", bg: "bg-pass/8", dot: "bg-pass" };
   return (
-    <div className="bg-panel p-5">
-      <p className={`mb-4 font-mono text-[0.85rem] font-medium ${accent.split(" ")[1]}`}>$ {heading}</p>
+    <div className="rounded-xl border border-rule bg-panel p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/5">
+      <p className={`mb-4 flex items-center gap-2 font-mono text-[0.85rem] font-medium ${t.text}`}>
+        <span className={`size-2 rounded-full ${t.dot} ${tone === "rec" ? "rec-dot" : ""}`} />$ {heading}
+      </p>
       <ol className="list-none! space-y-1.5 pl-0!">
-        {rows.map(([text, kind]) => (
-          <li
-            key={text}
-            className={
-              kind === "edge"
-                ? "pl-4 text-muted before:mr-2 before:content-['↓']"
-                : kind === "keploy"
-                  ? `border-l-2 py-1 pl-3 font-medium ${accent}`
+        {rows.map(([text, kind], i) =>
+          kind === "edge" ? (
+            <li key={text} className="flex items-center gap-3 pl-4 text-muted">
+              {/* A dot travels down the edge to show the direction of traffic */}
+              <span className="relative h-5 w-px bg-rule">
+                <span
+                  className={`flow-dot absolute -left-[2.5px] top-0 size-1.5 rounded-full ${t.dot}`}
+                  style={{ animationDelay: `${i * 0.25}s` }}
+                />
+              </span>
+              {text}
+            </li>
+          ) : (
+            <li
+              key={text}
+              className={
+                kind === "keploy"
+                  ? `rounded-r-md border-l-2 py-1 pl-3 font-medium ${t.bar} ${t.bg} ${t.text}`
                   : kind === "gone"
-                    ? "rounded border border-dashed border-rule px-3 py-1 text-muted line-through"
-                    : "rounded border border-rule px-3 py-1 text-ink"
-            }
-          >
-            {text}
-          </li>
-        ))}
+                    ? "rounded-md border border-dashed border-rule px-3 py-1 text-muted line-through"
+                    : "rounded-md border border-rule px-3 py-1 text-ink"
+              }
+            >
+              {text}
+            </li>
+          ),
+        )}
       </ol>
     </div>
   );

@@ -5,10 +5,12 @@ A single-page, beginner-friendly tutorial that walks through Keploy's
 inspect the generated YAML tests and mocks, replay them without a database, and catch a regression.
 
 Built with **Next.js 16 (App Router) + MDX** and **Tailwind CSS v4**. Type is IBM Plex Sans / Plex Mono for UI and code,
-with Source Serif 4 for the long-form body. Colour is semantic: red marks recording, green marks replay.
+with Source Serif 4 for the long-form body. Zinc + orange palette; inside diagrams and terminals, red marks recording and green marks replay.
 
 ## Features
 
+- "Let an AI coding agent do it": animated Claude Code, Codex and OpenCode sessions that install Keploy and run record/test, plus install commands and an `AGENTS.md` template
+- Motion throughout: scroll reveals, animated record/replay diagram, sliding tab indicators, circular theme-switch transition (View Transitions API); all disabled under `prefers-reduced-motion`
 - An animated record-then-replay terminal session in the hero (respects `prefers-reduced-motion`)
 - Tutorial content lives in [`app/page.mdx`](app/page.mdx), with Markdown and React components mixed together
 - Syntax highlighting via `rehype-pretty-code` (Shiki) with dual light/dark themes, file titles and line highlights
@@ -36,6 +38,7 @@ app/
   globals.css     # Tailwind + code block / steps styles
 components/
   docs.tsx        # server components used in MDX (Callout, Steps, FileTree, diagram)
+  agents.tsx      # animated AI-agent sessions (Claude Code, Codex, OpenCode)
   client.tsx      # interactive pieces (session demo, Tabs, copy button, contents rail, progress)
   theme.tsx       # theme provider + toggle
 mdx-components.tsx  # global MDX element overrides

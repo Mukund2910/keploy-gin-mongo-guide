@@ -1,3 +1,4 @@
+import { AgentDemo } from "@/components/agents";
 import { SessionDemo, Tabs, Tab } from "@/components/client";
 import { Callout, FileTree, RecordReplayDiagram, Step, Steps } from "@/components/docs";
 
@@ -52,6 +53,11 @@ the network layer (using eBPF on Linux) and sees traffic going in and out of you
   Keploy's network capture is built on Linux eBPF (kernel **5.10+**). On Windows, do everything in this guide
   inside a **WSL2 Ubuntu** shell, with Docker Desktop's WSL integration turned on. On macOS, Keploy's installer
   handles the setup for you. Check the [installation docs](https://keploy.io/docs/server/install/) for your platform.
+</Callout>
+
+<Callout type="tip" title="Using Claude Code, Codex or OpenCode?">
+  Your AI coding agent can run every step below for you. See [Let an AI coding agent do it](#let-an-ai-coding-agent-do-it),
+  then come back here to understand what it did.
 </Callout>
 
 ## Step 1: Install Keploy
@@ -307,6 +313,90 @@ assertion. Revert the change and the suite goes green again.
 <Callout type="info" title="Intentional change?">
   If the new response is what you *want*, don't edit YAML by hand: delete the stale test (or the whole test set)
   and record again. Re-recording is the normal way to update Keploy tests.
+</Callout>
+
+## Let an AI coding agent do it
+
+Everything above is a handful of shell commands, which makes it a good job for a terminal coding agent. Here's the
+same tutorial driven by **Claude Code**, **Codex** and **OpenCode**. Pick one to watch:
+
+<AgentDemo />
+
+The agent doesn't need anything Keploy-specific. It runs the same `keploy record` and `keploy test` commands you
+ran by hand. What helps is telling it how Keploy works in your project, and reviewing what it runs.
+
+### 1. Install your agent
+
+<Tabs labels={["Claude Code", "Codex", "OpenCode"]}>
+<Tab>
+
+```bash
+npm install -g @anthropic-ai/claude-code
+cd samples-go/gin-mongo
+claude
+```
+
+Needs Node.js 18 or newer. The first launch walks you through signing in.
+
+</Tab>
+<Tab>
+
+```bash
+npm install -g @openai/codex
+cd samples-go/gin-mongo
+codex
+```
+
+Install the scoped package `@openai/codex`. The unscoped `codex` package on npm is an unrelated tool.
+
+</Tab>
+<Tab>
+
+```bash
+curl -fsSL https://opencode.ai/install | bash
+cd samples-go/gin-mongo
+opencode
+```
+
+OpenCode works with several model providers. Pick one when it starts.
+
+</Tab>
+</Tabs>
+
+### 2. Give it Keploy context
+
+Agents read a project instructions file at startup: **Codex** and **OpenCode** read `AGENTS.md`, and **Claude
+Code** reads `CLAUDE.md`. Drop this in the app's root folder:
+
+```md title="AGENTS.md"
+# Testing with Keploy
+
+- Install: `curl --silent -O -L https://keploy.io/install.sh && source install.sh`
+- The compose file uses an external network: run `docker network create keploy-network` once.
+- Record: `keploy record -c "docker compose up" --container-name ginMongoApp`, then send real requests with curl.
+- Replay: `keploy test -c "docker compose up" --container-name ginMongoApp --delay 10`
+- Tests live in `keploy/`. Don't hand-edit them; re-record when a response changes on purpose.
+- Fields that change on every run (timestamps, IDs) belong under `assertions.noise` in the test YAML.
+```
+
+<Callout type="info" title="One file for all three">
+  Claude Code can import another file from `CLAUDE.md`. Create a `CLAUDE.md` containing just `@AGENTS.md` and all
+  three agents share the same instructions.
+</Callout>
+
+### 3. Ask it
+
+Start the agent in the app folder and paste:
+
+```text
+Install Keploy, record API tests for this Gin + Mongo app with docker compose,
+then replay them and tell me the result.
+```
+
+<Callout type="warning" title="Stay in the loop">
+  Read each command before you approve it. On Linux, Keploy needs `sudo` to record, so approve that command on its
+  own instead of giving the agent blanket root access. When it's done, open `keploy/test-set-0/` yourself: the YAML
+  is the source of truth, not the agent's summary.
 </Callout>
 
 ## Troubleshooting
