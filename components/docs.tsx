@@ -60,17 +60,116 @@ export function Callout({
   );
 }
 
-/* Numbered sub-steps. Numbers come from a CSS counter (see globals.css). */
-export function Steps({ children }: { children: React.ReactNode }) {
-  return <div className="steps my-8! ml-3.5 border-l border-rule pl-8">{children}</div>;
+/* A tutorial section: big numbered badge (or icon), title and a time estimate. Keeps each step visually separate. */
+export function Section({
+  n,
+  icon,
+  id,
+  title,
+  time,
+  children,
+}: {
+  n?: number;
+  icon?: string;
+  id?: string;
+  title: string;
+  time?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section id={id} className="my-20! scroll-mt-24 first:mt-0!">
+      <div className="mb-6 flex items-center gap-4">
+        <span
+          className={`grid size-12 shrink-0 place-items-center rounded-2xl font-sans text-xl font-semibold transition-transform duration-300 hover:-rotate-6 hover:scale-105 ${
+            n
+              ? "bg-gradient-to-br from-orange-500 to-amber-400 text-white shadow-lg shadow-orange-500/25"
+              : "border border-rule bg-sunk text-2xl"
+          }`}
+          aria-hidden
+        >
+          {n ?? icon}
+        </span>
+        <div>
+          <h2 className="text-[1.6rem]! leading-tight">{title}</h2>
+          {time && <p className="mt-0.5 font-sans text-sm text-muted">{time}</p>}
+        </div>
+      </div>
+      <div className="space-y-5 sm:pl-16 [&>figure]:my-5!">{children}</div>
+    </section>
+  );
 }
 
-export function Step({ title, children }: { title: string; children: React.ReactNode }) {
+/* Collapsible "go deeper" panel, so the main path stays short. */
+export function Details({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="step relative pb-6 last:pb-0 [&>*+*]:mt-4">
-      <h3 className="mt-0! text-[1.0625rem]!">{title}</h3>
-      {children}
+    <details className="group rounded-xl border border-rule bg-panel transition-colors open:border-accent/40 hover:border-accent/40">
+      <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3 font-sans text-[0.95rem] font-medium text-ink [&::-webkit-details-marker]:hidden">
+        <span className="grid size-5 place-items-center rounded-full bg-accent/10 text-xs text-accent transition-transform duration-300 group-open:rotate-90">
+          ▶
+        </span>
+        {title}
+      </summary>
+      <div className="details-body space-y-4 border-t border-rule px-4 pb-4 pt-3 text-[1.02rem] [&_figure]:my-3!">{children}</div>
+    </details>
+  );
+}
+
+export function Pills({ items }: { items: string[] }) {
+  return (
+    <ul className="flex! list-none! flex-wrap gap-2 pl-0! font-sans text-sm">
+      {items.map((item) => (
+        <li
+          key={item}
+          className="mt-0! rounded-full border border-rule bg-panel px-3 py-1 text-ink transition-all hover:-translate-y-0.5 hover:border-accent hover:text-accent"
+        >
+          {item}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/* The whole tutorial at a glance: one card per command. */
+export function Glance({ steps }: { steps: { label: string; cmd: string }[] }) {
+  return (
+    <div className="my-12! rounded-2xl border border-rule bg-sunk/50 p-5 sm:p-6">
+      <p className="mb-4 font-sans text-[0.95rem] font-semibold text-ink">The whole tutorial in {steps.length} commands</p>
+      <ol className="grid! list-none! gap-3 pl-0! sm:grid-cols-2">
+        {steps.map((s, i) => (
+          <li
+            key={s.cmd}
+            className="group mt-0! flex gap-3 rounded-xl border border-rule bg-panel p-3.5 transition-all duration-300 hover:-translate-y-1 hover:border-accent/50 hover:shadow-lg hover:shadow-orange-500/5"
+          >
+            <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-accent/10 font-sans text-sm font-semibold text-accent transition-colors group-hover:bg-accent group-hover:text-white">
+              {i + 1}
+            </span>
+            <div className="min-w-0">
+              <p className="font-sans text-sm text-muted">{s.label}</p>
+              <code className="mt-1 block truncate font-mono text-[0.8rem] text-ink" title={s.cmd}>
+                {s.cmd}
+              </code>
+            </div>
+          </li>
+        ))}
+      </ol>
     </div>
+  );
+}
+
+/* End-of-tutorial checklist cards. */
+export function Wins({ items }: { items: string[] }) {
+  return (
+    <ul className="grid! list-none! gap-3 pl-0! font-sans sm:grid-cols-3">
+      {items.map((item) => (
+        <li
+          key={item}
+          className="mt-0! rounded-xl border border-pass/30 bg-pass/5 p-4 text-[0.95rem] leading-snug text-ink transition-transform hover:-translate-y-1"
+        >
+          <span className="mb-2 grid size-7 place-items-center rounded-full bg-pass text-sm text-white">✓</span>
+          {item}
+        </li>
+      ))}
+    </ul>
   );
 }
 

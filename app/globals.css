@@ -89,7 +89,6 @@ body {
     font-family: var(--font-serif);
     font-size: 1.125rem;
     line-height: 1.75;
-    max-width: 68ch;
   }
 
   .doc > * + * {
@@ -112,9 +111,6 @@ body {
   }
 
   .doc h2 {
-    margin-top: 4.5rem;
-    padding-top: 2.5rem;
-    border-top: 1px solid var(--rule);
     font-size: 1.75rem;
     line-height: 1.2;
     font-weight: 600;
@@ -299,42 +295,6 @@ body {
   color: var(--shiki-dark);
 }
 
-/* ---------- Steps ---------- */
-
-.steps {
-  counter-reset: step;
-}
-
-.step {
-  counter-increment: step;
-}
-
-.step::before {
-  content: counter(step);
-  position: absolute;
-  left: -2.75rem;
-  top: 0.1rem;
-  display: grid;
-  place-items: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: 9999px;
-  background: var(--paper);
-  border: 1.5px solid var(--accent);
-  font-family: var(--font-sans);
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--accent);
-  transition:
-    background-color 0.3s,
-    color 0.3s;
-}
-
-.step:hover::before {
-  background: var(--accent);
-  color: var(--paper);
-}
-
 /* ---------- Motion ---------- */
 
 @keyframes rise {
@@ -393,6 +353,11 @@ body {
 }
 .doc > h1 + p + p {
   animation: rise 0.7s 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Collapsible panels slide their content in when opened */
+details[open] > .details-body {
+  animation: rise 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 /* Scroll reveal: <Reveal /> adds .reveal, then .is-visible once in view */

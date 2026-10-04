@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans, Source_Serif_4 } from "next/font/google";
-import { ReadingProgress, Reveal, Toc } from "@/components/client";
+import { ReadingProgress, Reveal } from "@/components/client";
 import { ThemeProvider, ThemeToggle } from "@/components/theme";
 import "./globals.css";
 
@@ -54,20 +54,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <ReadingProgress />
           </header>
 
-          <div className="mx-auto grid max-w-6xl gap-x-16 px-4 sm:px-6 lg:grid-cols-[13rem_minmax(0,1fr)]">
-            <aside className="hidden lg:block">
-              <div className="sticky top-24 py-12">
-                <Toc />
-              </div>
-            </aside>
-            <main id="content" className="min-w-0 pb-24 pt-12 lg:pt-16">
-              <article className="doc">{children}</article>
-              <Reveal />
-            </main>
-          </div>
+          <main id="content" className="mx-auto max-w-3xl px-4 pb-28 pt-12 sm:px-6 lg:pt-20">
+            <article className="doc">{children}</article>
+            <Reveal />
+          </main>
 
           <footer className="border-t border-rule">
-            <div className="mx-auto max-w-6xl px-4 py-8 text-sm text-muted sm:px-6">
+            <div className="mx-auto max-w-3xl px-4 py-8 text-sm text-muted sm:px-6">
               Built with Next.js and MDX. The sample app is{" "}
               <a className="text-accent underline underline-offset-2" href="https://github.com/keploy/samples-go/tree/main/gin-mongo" target="_blank" rel="noreferrer">
                 keploy/samples-go/gin-mongo

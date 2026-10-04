@@ -233,66 +233,6 @@ export function Tab({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-/* ---------- Contents rail with scroll-spy ---------- */
-
-export function Toc() {
-  const [items, setItems] = useState<{ id: string; text: string }[]>([]);
-  const [active, setActive] = useState(-1);
-
-  useEffect(() => {
-    const headings = Array.from(document.querySelectorAll<HTMLElement>("article h2[id]"));
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- headings only exist after render
-    setItems(headings.map((h) => ({ id: h.id, text: h.textContent ?? "" })));
-
-    // Active section = the last heading that has scrolled past the top third of the viewport.
-    const onScroll = () => {
-      const line = window.innerHeight / 3;
-      let idx = -1;
-      headings.forEach((h, i) => {
-        if (h.getBoundingClientRect().top < line) idx = i;
-      });
-      setActive(idx);
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <nav aria-label="Contents" className="text-[0.85rem] leading-snug">
-      <p className="mb-4 font-medium text-ink">On this page</p>
-      <ol className="relative space-y-3 before:absolute before:bottom-1.5 before:left-[4.5px] before:top-1.5 before:w-px before:bg-rule">
-        {items.map((item, i) => {
-          const state = i < active ? "done" : i === active ? "active" : "todo";
-          return (
-            <li key={item.id} className="relative pl-5">
-              <span
-                aria-hidden
-                className={`absolute left-0 top-[0.3rem] size-2.5 rounded-full border-[1.5px] transition-all duration-300 ${
-                  state === "done"
-                    ? "border-accent bg-accent/40"
-                    : state === "active"
-                      ? "scale-125 border-accent bg-accent shadow-[0_0_0_4px] shadow-accent/20"
-                      : "border-rule bg-paper"
-                }`}
-              />
-              <a
-                href={`#${item.id}`}
-                aria-current={state === "active" ? "location" : undefined}
-                className={`block transition-all duration-200 hover:translate-x-0.5 ${
-                  state === "active" ? "font-medium text-accent" : "text-muted hover:text-ink"
-                }`}
-              >
-                {item.text}
-              </a>
-            </li>
-          );
-        })}
-      </ol>
-    </nav>
-  );
-}
-
 /* ---------- Reading progress ---------- */
 
 export function ReadingProgress() {

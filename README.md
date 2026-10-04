@@ -18,7 +18,7 @@ with Source Serif 4 for the long-form body. Zinc + orange palette; inside diagra
   and a record-vs-replay diagram
 - Copy-to-clipboard on every code block
 - Dark/light mode toggle (`next-themes`, follows the system by default)
-- A contents rail that tracks how far through the tutorial you are, plus a reading progress bar
+- Skimmable layout: numbered step sections with time estimates, a 4-command summary, collapsible "go deeper" panels, plus a reading progress bar
 - Fully static output (`○ /` prerendered)
 
 ## Run locally
@@ -37,9 +37,9 @@ app/
   layout.tsx      # header, theme toggle, TOC sidebar
   globals.css     # Tailwind + code block / steps styles
 components/
-  docs.tsx        # server components used in MDX (Callout, Steps, FileTree, diagram)
+  docs.tsx        # server components used in MDX (Callout, Section, Details, Glance, FileTree, diagram)
   agents.tsx      # animated AI-agent sessions (Claude Code, Codex, OpenCode)
-  client.tsx      # interactive pieces (session demo, Tabs, copy button, contents rail, progress)
+  client.tsx      # interactive pieces (session demo, Tabs, copy button, scroll reveal, progress)
   theme.tsx       # theme provider + toggle
 mdx-components.tsx  # global MDX element overrides
 next.config.ts      # @next/mdx + remark/rehype plugins

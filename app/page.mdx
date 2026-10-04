@@ -1,160 +1,121 @@
 import { AgentDemo } from "@/components/agents";
 import { SessionDemo, Tabs, Tab } from "@/components/client";
-import { Callout, FileTree, RecordReplayDiagram, Step, Steps } from "@/components/docs";
+import { Callout, Details, FileTree, Glance, Pills, RecordReplayDiagram, Section, Wins } from "@/components/docs";
 
 # Your first Keploy tests in Go
 
-<p className="mt-4! font-sans text-[1.0625rem] text-muted">A 20-minute walkthrough with a Gin + MongoDB URL shortener.</p>
+<p className="mt-4! font-sans text-[1.15rem] text-muted">Turn real API calls into tests. No test code, no database, about 15 minutes.</p>
 
-You have a Go API. It talks to a database. You know you *should* have integration tests, but writing them means
-spinning up Mongo in CI, seeding data, hand-writing request/response assertions, and keeping all of it in sync
-with the code. So it doesn't happen.
-
-This guide takes a different route. You'll use a small app the way a client would, with two `curl` calls, and
-let **Keploy** turn that traffic into tests that run **without a database**. You won't write any test code.
-Here's the whole idea in one session:
+You'll take a small Gin + MongoDB URL shortener, hit it with two `curl` calls, and let **Keploy** turn that
+traffic into tests you can replay anywhere. Here's the whole idea, playing live:
 
 <SessionDemo />
 
-<Callout type="info" title="Who this is for">
-  You're comfortable with Go and the terminal, have used Docker before, and have **never touched Keploy**. You
-  don't need to know Gin or MongoDB. We won't write any app code except one deliberate bug.
-</Callout>
+<Glance
+  steps={[
+    { label: "Install Keploy", cmd: "curl --silent -O -L https://keploy.io/install.sh && source install.sh" },
+    { label: "Record while you use the app", cmd: 'keploy record -c "docker compose up" --container-name ginMongoApp' },
+    { label: "Send real traffic", cmd: "curl -X POST localhost:8080/url -d '{\"url\":\"https://google.com\"}'" },
+    { label: "Replay it as tests", cmd: 'keploy test -c "docker compose up" --container-name ginMongoApp --delay 10' },
+  ]}
+/>
 
-## How Keploy works (the 60-second version)
+<Section icon="💡" title="How it works" time="30-second read">
 
-Keploy sits between your app and the outside world. It doesn't need an SDK or code changes because it hooks into
-the network layer (using eBPF on Linux) and sees traffic going in and out of your process.
+Keploy sits next to your app and watches its traffic. **Record** once against the real database, then **replay**
+as often as you like without it.
 
 <RecordReplayDiagram />
 
-- **In record mode**, every incoming HTTP request and the response your app sends back is saved as a **test case**.
-  Every outgoing call your app makes while handling it (here: MongoDB queries) is saved, along with the reply, as a
-  **mock**.
-- **In test mode**, Keploy starts your app, fires the recorded requests at it, and compares the new responses to
-  the recorded ones. When your app queries MongoDB, Keploy intercepts the query and answers from the mocks.
+<Details title="Why is this better than writing integration tests?">
 
-<Callout type="aha">
-  That last point is the big one. Your tests are **integration tests** (real HTTP, real handlers, real driver code)
-  but they're as **portable as unit tests**, because the database is replaced by recorded answers. CI doesn't need a
-  Mongo container.
-</Callout>
+Your tests exercise real HTTP, real handlers and real driver code, yet they run like unit tests: Keploy answers the
+database queries from recorded mocks, so CI doesn't need a Mongo container. And because Keploy hooks into the
+network layer (eBPF on Linux), you don't add an SDK or change your code.
 
-## Prerequisites
+</Details>
 
-| Tool | Why you need it | Check |
-| --- | --- | --- |
-| Docker (Desktop or Engine) | Runs MongoDB, and the app itself in the Compose path | `docker --version` |
-| Git | Clone the sample app | `git --version` |
-| Go 1.22+ *(native path only)* | Run the app directly with `go run` | `go version` |
-| Linux, macOS or Windows (WSL2) | Keploy's capture relies on Linux kernel features | `uname -a` |
+</Section>
+
+<Section icon="🧰" title="Before you start" time="Check these once">
+
+<Pills items={["Docker", "Git", "Linux, macOS or Windows (WSL2)", "Go 1.22+ (only for the native path)"]} />
 
 <Callout type="warning" title="On Windows? Use WSL2">
-  Keploy's network capture is built on Linux eBPF (kernel **5.10+**). On Windows, do everything in this guide
-  inside a **WSL2 Ubuntu** shell, with Docker Desktop's WSL integration turned on. On macOS, Keploy's installer
-  handles the setup for you. Check the [installation docs](https://keploy.io/docs/server/install/) for your platform.
+  Keploy's capture is built on Linux eBPF (kernel 5.10+). Run everything inside a WSL2 Ubuntu shell with Docker
+  Desktop's WSL integration on.
 </Callout>
 
 <Callout type="tip" title="Using Claude Code, Codex or OpenCode?">
-  Your AI coding agent can run every step below for you. See [Let an AI coding agent do it](#let-an-ai-coding-agent-do-it),
-  then come back here to understand what it did.
+  Your agent can do every step for you. [Jump to the agent section](#ai-agents).
 </Callout>
 
-## Step 1: Install Keploy
+</Section>
 
-<Steps>
-<Step title="Run the installer">
+<Section n={1} title="Install Keploy" time="1 minute">
 
 ```bash
 curl --silent -O -L https://keploy.io/install.sh && source install.sh
-```
-
-The script detects your OS and architecture and puts a `keploy` binary on your `PATH`.
-
-</Step>
-<Step title="Verify it worked">
-
-```bash
 keploy --help
 ```
 
-You should see the list of commands, including `record` and `test`. Those are the only two we need today.
+If you see a list of commands including `record` and `test`, you're set.
 
-</Step>
-</Steps>
+</Section>
 
-## Step 2: Get the sample app
-
-Keploy maintains a repo of sample apps. We'll use `gin-mongo`, a URL shortener with two endpoints:
-
-- `POST /url` takes a long URL, stores it in Mongo, and returns a short link.
-- `GET /:id` looks the ID up in Mongo and redirects (HTTP `303`) to the original URL.
+<Section n={2} title="Get the sample app" time="1 minute">
 
 ```bash
 git clone https://github.com/keploy/samples-go.git
 cd samples-go/gin-mongo
+rm -rf keploy   # start clean: the repo ships with pre-recorded tests
 ```
+
+It's a URL shortener: `POST /url` stores a link in Mongo, `GET /:id` redirects to it.
+
+<Details title="What's in the folder?">
 
 <FileTree>
 {`
 gin-mongo/
 ├── main.go               # Gin router + Mongo connection
-├── handler.go            # POST /url and GET /:id handlers
+├── handler.go            # POST /url and GET /:id
 ├── Dockerfile
 ├── docker-compose.yaml   # app (ginMongoApp) + mongo
-└── keploy/               # tests already recorded by the Keploy team
-    └── test-set-0/
+└── keploy/               # pre-recorded tests (you just deleted these)
 `}
 </FileTree>
 
-<Callout type="tip" title="Start with a clean slate">
-  The repo ships with a `keploy/` folder that already contains recorded tests. To make sure everything you see
-  later was produced by *you*, delete it first: `rm -rf keploy`. (If you keep it, your recording simply becomes
-  `test-set-1` next to it.)
-</Callout>
+</Details>
 
-## Step 3: Record test cases
+</Section>
 
-Pick how you want to run the app. **Docker Compose** is the easiest path because nothing but Docker needs to be
-installed. **Native** is closer to everyday development if you already have Go.
+<Section n={3} title="Record some tests" time="5 minutes">
+
+Start the app **through** Keploy. Pick how you run it:
 
 <Tabs labels={["Docker Compose", "Native (go run)"]}>
 <Tab>
 
-The Compose file attaches both containers to a network called `keploy-network` and marks it `external`, which
-means Compose expects it to **already exist**. Create it once:
-
 ```bash
-docker network create keploy-network
-```
-
-Now start the app *through* Keploy:
-
-```bash
+docker network create keploy-network   # the compose file expects it
 keploy record -c "docker compose up" --container-name "ginMongoApp"
 ```
 
-- `-c` is the command Keploy should run to start your app.
-- `--container-name` tells Keploy which of the Compose containers is *your app*, i.e. whose traffic to capture.
-  It matches `container_name: ginMongoApp` in `docker-compose.yaml`.
+`--container-name` tells Keploy which container is your app.
 
 </Tab>
 <Tab>
-
-Start only MongoDB in Docker:
 
 ```bash
 docker compose up mongo
 ```
 
-The app connects to a host named `mongoDb`, which only resolves inside the Docker network. Since the app now runs
-on your machine, point it at `localhost` in `main.go`:
+In `main.go`, point the app at `localhost`, then record:
 
 ```go title="main.go" {1}
 client, err := New("localhost:27017", dbName) // was "mongoDb:27017"
 ```
-
-Then, in a second terminal, start the app through Keploy:
 
 ```bash
 keploy record -c "go run main.go handler.go"
@@ -163,101 +124,68 @@ keploy record -c "go run main.go handler.go"
 </Tab>
 </Tabs>
 
-<Callout type="warning" title="Permission denied?">
-  On Linux, Keploy needs elevated privileges to attach its eBPF hooks. If `record` fails with a permission error,
-  re-run it with `sudo -E env PATH=$PATH keploy record ...` so `sudo` can still find Go and Docker.
-</Callout>
-
-Wait until you see Gin's startup log (`Listening and serving HTTP on :8080`). The app is now running normally;
-Keploy is just listening.
-
-### Make some API calls
-
-Open another terminal and use the app like a real client would. First, shorten a URL:
+Once Gin says `Listening and serving HTTP on :8080`, open another terminal and use the app:
 
 ```bash
-curl --request POST \
-  --url http://localhost:8080/url \
-  --header 'content-type: application/json' \
-  --data '{"url": "https://google.com"}'
+curl -X POST localhost:8080/url   -H 'content-type: application/json' -d '{"url": "https://google.com"}'
+curl localhost:8080/Lhr4BWAi
 ```
 
-```json title="Response"
-{"ts":1718943885198315028,"url":"http://localhost:8080/Lhr4BWAi"}
-```
+Each call shows up in Keploy as a captured test. Stop with <kbd>Ctrl</kbd> + <kbd>C</kbd>.
 
-Then follow the short link:
+<Details title="Why is the short ID always Lhr4BWAi?">
 
-```bash
-curl --request GET --url http://localhost:8080/Lhr4BWAi
-```
+The app derives it from a SHA-256 hash of the long URL, so `https://google.com` always becomes `Lhr4BWAi`. That
+determinism is why the recorded `GET` keeps passing on replay.
 
-```html title="Response"
-<a href="https://google.com">See Other</a>.
-```
+</Details>
 
-Each call shows up in the Keploy terminal as a captured test case. Stop recording with <kbd>Ctrl</kbd> + <kbd>C</kbd>.
+<Details title="Permission denied on Linux?">
 
-<Callout type="aha" title="Why the short ID is always Lhr4BWAi">
-  The app derives the ID from a SHA-256 hash of the long URL, so `https://google.com` *always* becomes `Lhr4BWAi`.
-  That determinism is what lets the recorded `GET /Lhr4BWAi` keep passing on replay.
-</Callout>
+Keploy needs root to attach its eBPF hooks. Run it with `sudo -E env PATH=$PATH keploy record ...` so `sudo` still
+finds Go and Docker.
 
-## Step 4: Look at what Keploy recorded
+</Details>
 
-Keploy created a `keploy/` folder next to your code:
+</Section>
+
+<Section n={4} title="See what Keploy wrote" time="2 minutes">
 
 <FileTree>
 {`
-keploy/
-└── test-set-0/
-    ├── tests/
-    │   ├── test-1.yaml   # POST /url
-    │   └── test-2.yaml   # GET /Lhr4BWAi
-    └── mocks.yaml        # every MongoDB call + its reply
+keploy/test-set-0/
+├── tests/
+│   ├── test-1.yaml   # POST /url
+│   └── test-2.yaml   # GET /Lhr4BWAi
+└── mocks.yaml        # every Mongo query + its reply
 `}
 </FileTree>
 
-Open `test-1.yaml`. Trimmed down, it looks like this:
+Each test is plain YAML: the request, the response, and a **noise** list.
 
-```yaml title="keploy/test-set-0/tests/test-1.yaml" {13-16}
-kind: Http
-name: test-1
-spec:
-  req:
-    method: POST
-    url: http://localhost:8080/url
-    header:
-      Content-Type: application/json
-    body: '{"url": "https://google.com"}'
-  resp:
-    status_code: 200
-    body: '{"ts":1718943885198315028,"url":"http://localhost:8080/Lhr4BWAi"}'
-  assertions:
-    noise:
-      body.ts: []
-      header.Date: []
+```yaml title="tests/test-1.yaml (trimmed)" {7-10}
+req:
+  method: POST
+  url: http://localhost:8080/url
+resp:
+  status_code: 200
+  body: '{"ts":1718943885198315028,"url":"http://localhost:8080/Lhr4BWAi"}'
+assertions:
+  noise:
+    body.ts: []
+    header.Date: []
 ```
 
-It's plain YAML: the exact request, the exact response, and an `assertions.noise` block.
-
-<Callout type="aha" title="What is “noise”?">
-  `ts` is a nanosecond timestamp, so it will be different on every run. If Keploy compared it strictly, the test
-  would fail forever. Keploy noticed that the field (and the `Date` header) is non-deterministic and marked it as
-  **noise**: it's ignored during comparison. If one of your own fields keeps changing (a UUID, a `createdAt`), add
-  it to `noise` the same way.
+<Callout type="aha" title="Noise = fields that change every run">
+  `ts` is a timestamp, so Keploy ignores it when comparing. Add your own changing fields (UUIDs, `createdAt`) the
+  same way.
 </Callout>
 
-`mocks.yaml` holds the MongoDB side: the `update` (upsert) issued by `POST /url` and the `find` issued by
-`GET /:id`, each with the reply Mongo sent. These entries are what replace the database during testing.
+<Callout type="tip">Commit the `keploy/` folder. It *is* your test suite.</Callout>
 
-<Callout type="tip">
-  Commit the `keploy/` folder to Git. It *is* your test suite, and the YAML diffs are easy to review in PRs.
-</Callout>
+</Section>
 
-## Step 5: Replay the tests
-
-Now let Keploy run the app again and replay everything it captured.
+<Section n={5} title="Replay them" time="2 minutes">
 
 <Tabs labels={["Docker Compose", "Native (go run)"]}>
 <Tab>
@@ -276,21 +204,21 @@ keploy test -c "go run main.go handler.go" --delay 10
 </Tab>
 </Tabs>
 
-`--delay 10` gives the app 10 seconds to boot before Keploy starts sending requests. If your machine is slow and
-the first test fails with a connection error, raise it.
+You should see **2 passed, 0 failed**. `--delay 10` gives the app time to boot; raise it if the first test can't
+connect.
 
-Keploy prints each test's result followed by a summary for the test set. You should see **2 passed, 0 failed**.
+<Details title="Try it: replay with MongoDB switched off">
 
-<Callout type="aha" title="Try this: stop MongoDB">
-  Run `docker stop mongoDB`, then run `keploy test` again (Native path). The tests **still pass**. The app's Mongo
-  queries never reached a database; Keploy answered them from `mocks.yaml`. This is exactly what makes these tests
-  cheap to run in CI.
-</Callout>
+On the native path, run `docker stop mongoDB` and replay again. The tests still pass: every Mongo query was
+answered from `mocks.yaml`.
 
-## Step 6: Catch a regression
+</Details>
 
-Passing tests are only useful if they fail when something breaks. Let's break something on purpose. In
-`handler.go`, rename the `url` key in the `POST /url` response:
+</Section>
+
+<Section n={6} title="Break it on purpose" time="3 minutes">
+
+Rename a field in the `POST /url` response in `handler.go`:
 
 ```go title="handler.go" {3}
 c.JSON(http.StatusOK, gin.H{
@@ -299,126 +227,123 @@ c.JSON(http.StatusOK, gin.H{
 })
 ```
 
-Run `keploy test` again.
+Run `keploy test` again (Compose users: add `--build` to the compose command). **test-1 fails** with a diff showing
+`url` missing. Any client reading `url` would have broken, and you caught it without writing an assertion.
 
-<Callout type="warning" title="Compose users: rebuild the image">
-  `docker compose up` reuses the image it built earlier, so it won't see your change. Use
-  `-c "docker compose up --build"` for this run.
-</Callout>
+<Details title="What if the change was intentional?">
 
-This time `test-1` **fails**, and Keploy shows a diff of the expected vs. actual body: `url` is missing and
-`short_url` appeared. Any client that read `url` would have broken, and you found out without writing a single
-assertion. Revert the change and the suite goes green again.
+Delete the stale test (or the whole test set) and record again. Re-recording is how you update Keploy tests; don't
+hand-edit the YAML.
 
-<Callout type="info" title="Intentional change?">
-  If the new response is what you *want*, don't edit YAML by hand: delete the stale test (or the whole test set)
-  and record again. Re-recording is the normal way to update Keploy tests.
-</Callout>
+</Details>
 
-## Let an AI coding agent do it
+</Section>
 
-Everything above is a handful of shell commands, which makes it a good job for a terminal coding agent. Here's the
-same tutorial driven by **Claude Code**, **Codex** and **OpenCode**. Pick one to watch:
+<Section id="ai-agents" icon="🤖" title="Let an AI agent do it" time="Claude Code, Codex or OpenCode">
+
+Everything above is a few shell commands, so a terminal coding agent can run it all. Pick one and watch:
 
 <AgentDemo />
 
-The agent doesn't need anything Keploy-specific. It runs the same `keploy record` and `keploy test` commands you
-ran by hand. What helps is telling it how Keploy works in your project, and reviewing what it runs.
-
-### 1. Install your agent
+Install yours and start it in the app folder:
 
 <Tabs labels={["Claude Code", "Codex", "OpenCode"]}>
 <Tab>
 
 ```bash
 npm install -g @anthropic-ai/claude-code
-cd samples-go/gin-mongo
-claude
+cd samples-go/gin-mongo && claude
 ```
-
-Needs Node.js 18 or newer. The first launch walks you through signing in.
 
 </Tab>
 <Tab>
 
 ```bash
-npm install -g @openai/codex
-cd samples-go/gin-mongo
-codex
+npm install -g @openai/codex   # the scoped package, not plain "codex"
+cd samples-go/gin-mongo && codex
 ```
-
-Install the scoped package `@openai/codex`. The unscoped `codex` package on npm is an unrelated tool.
 
 </Tab>
 <Tab>
 
 ```bash
 curl -fsSL https://opencode.ai/install | bash
-cd samples-go/gin-mongo
-opencode
+cd samples-go/gin-mongo && opencode
 ```
-
-OpenCode works with several model providers. Pick one when it starts.
 
 </Tab>
 </Tabs>
 
-### 2. Give it Keploy context
-
-Agents read a project instructions file at startup: **Codex** and **OpenCode** read `AGENTS.md`, and **Claude
-Code** reads `CLAUDE.md`. Drop this in the app's root folder:
-
-```md title="AGENTS.md"
-# Testing with Keploy
-
-- Install: `curl --silent -O -L https://keploy.io/install.sh && source install.sh`
-- The compose file uses an external network: run `docker network create keploy-network` once.
-- Record: `keploy record -c "docker compose up" --container-name ginMongoApp`, then send real requests with curl.
-- Replay: `keploy test -c "docker compose up" --container-name ginMongoApp --delay 10`
-- Tests live in `keploy/`. Don't hand-edit them; re-record when a response changes on purpose.
-- Fields that change on every run (timestamps, IDs) belong under `assertions.noise` in the test YAML.
-```
-
-<Callout type="info" title="One file for all three">
-  Claude Code can import another file from `CLAUDE.md`. Create a `CLAUDE.md` containing just `@AGENTS.md` and all
-  three agents share the same instructions.
-</Callout>
-
-### 3. Ask it
-
-Start the agent in the app folder and paste:
+Then paste:
 
 ```text
 Install Keploy, record API tests for this Gin + Mongo app with docker compose,
 then replay them and tell me the result.
 ```
 
+<Details title="Give your agent Keploy context with AGENTS.md">
+
+Codex and OpenCode read `AGENTS.md`; Claude Code reads `CLAUDE.md` (put `@AGENTS.md` in it to share one file).
+
+```md title="AGENTS.md"
+# Testing with Keploy
+
+- Install: `curl --silent -O -L https://keploy.io/install.sh && source install.sh`
+- Run `docker network create keploy-network` once (the compose file expects it).
+- Record: `keploy record -c "docker compose up" --container-name ginMongoApp`, then send real requests with curl.
+- Replay: `keploy test -c "docker compose up" --container-name ginMongoApp --delay 10`
+- Tests live in `keploy/`. Don't hand-edit them; re-record when a response changes on purpose.
+- Fields that change every run (timestamps, IDs) go under `assertions.noise`.
+```
+
+</Details>
+
 <Callout type="warning" title="Stay in the loop">
-  Read each command before you approve it. On Linux, Keploy needs `sudo` to record, so approve that command on its
-  own instead of giving the agent blanket root access. When it's done, open `keploy/test-set-0/` yourself: the YAML
-  is the source of truth, not the agent's summary.
+  Read each command before approving it, and approve `sudo` one command at a time. Check `keploy/test-set-0/`
+  yourself afterwards.
 </Callout>
 
-## Troubleshooting
+</Section>
 
-| Symptom | Likely cause | Fix |
-| --- | --- | --- |
-| `network keploy-network declared as external, but could not be found` | Network not created yet | `docker network create keploy-network` |
-| App can't reach Mongo when using `go run` | Host is still `mongoDb` | Change it to `localhost:27017` in `main.go` |
-| First test fails with *connection refused* | App wasn't ready when replay started | Increase `--delay` |
-| Code change has no effect in Compose mode | Old image reused | Add `--build` to the Compose command |
-| Permission errors on Linux | eBPF needs root | Run Keploy with `sudo -E` |
+<Section icon="🛟" title="Stuck?" time="Common problems">
 
-## Recap and next steps
+<Details title="“network keploy-network declared as external, but could not be found”">
 
-In about 20 minutes you:
+Run `docker network create keploy-network`, then record again.
 
-1. **Recorded** real API traffic from a Go app, with no SDK and no code changes.
-2. Got **YAML test cases and database mocks** you can read, review and commit.
-3. **Replayed** them without MongoDB, and watched them **catch a breaking change**.
+</Details>
 
-Where to go from here:
+<Details title="The app can't reach Mongo when using go run">
 
-- Run `keploy test` in CI. See the [Keploy docs](https://keploy.io/docs/) for GitHub Actions setup.
-- Try another Go sample (Echo + Postgres, Mux + MySQL) from [keploy/samples-go](https://github.com/keploy/samples-go).
-- Point Keploy at your own service: record a few real flows and see what it catches.
+The host is still `mongoDb`. Change it to `localhost:27017` in `main.go`.
+
+</Details>
+
+<Details title="The first test fails with “connection refused”">
+
+The app wasn't ready when replay started. Increase `--delay`.
+
+</Details>
+
+<Details title="My code change has no effect in Compose mode">
+
+Compose reused the old image. Use `-c "docker compose up --build"`.
+
+</Details>
+
+</Section>
+
+<Section icon="🎉" title="You did it">
+
+<Wins
+  items={[
+    "Recorded real API traffic, with no SDK and no code changes",
+    "Got readable YAML tests and database mocks to commit",
+    "Replayed them without MongoDB and caught a breaking change",
+  ]}
+/>
+
+Next: run `keploy test` in CI ([Keploy docs](https://keploy.io/docs/)), try another sample from
+[keploy/samples-go](https://github.com/keploy/samples-go), or point Keploy at your own service.
+
+</Section>
