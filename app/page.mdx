@@ -48,18 +48,93 @@ network layer (eBPF on Linux), you don't add an SDK or change your code.
 
 <Pills items={["Docker", "Git", "Linux, macOS or Windows (WSL2)", "Go 1.22+ (only for the native path)"]} />
 
-<Grid>
-
 <Callout type="warning" title="On Windows? Use WSL2">
   Keploy's capture is built on Linux eBPF (kernel 5.10+). Run everything inside a WSL2 Ubuntu shell with Docker
   Desktop's WSL integration on.
 </Callout>
 
-<Callout type="tip" title="Using Claude Code, Codex or OpenCode?">
-  Your agent can do every step for you. [Jump to the agent section](#ai-agents).
-</Callout>
+</Section>
+
+<Section id="ai-agents" icon="🤖" title="Let an AI agent do it" time="Claude Code, Codex or OpenCode">
+
+The whole tutorial is a handful of shell commands, so a terminal coding agent can run it for you. Pick one and watch:
+
+<Grid>
+
+<AgentDemo />
+
+<div className="space-y-5">
+
+Clone the sample app, then install your agent and start it inside it:
+
+```bash
+git clone https://github.com/keploy/samples-go.git
+```
+
+<Tabs labels={["Claude Code", "Codex", "OpenCode"]}>
+<Tab>
+
+```bash
+npm install -g @anthropic-ai/claude-code
+cd samples-go/gin-mongo && claude
+```
+
+</Tab>
+<Tab>
+
+```bash
+npm install -g @openai/codex   # the scoped package, not plain "codex"
+cd samples-go/gin-mongo && codex
+```
+
+</Tab>
+<Tab>
+
+```bash
+curl -fsSL https://opencode.ai/install | bash
+cd samples-go/gin-mongo && opencode
+```
+
+</Tab>
+</Tabs>
+
+Then paste:
+
+```text
+Install Keploy, record API tests for this Gin + Mongo app with docker compose,
+then replay them and tell me the result.
+```
+
+<Details title="Give your agent Keploy context with AGENTS.md">
+
+Codex and OpenCode read `AGENTS.md`; Claude Code reads `CLAUDE.md` (put `@AGENTS.md` in it to share one file).
+
+```md title="AGENTS.md"
+# Testing with Keploy
+
+- Install: `curl --silent -O -L https://keploy.io/install.sh && source install.sh`
+- Run `docker network create keploy-network` once (the compose file expects it).
+- Record: `keploy record -c "docker compose up" --container-name ginMongoApp`, then send real requests with curl.
+- Replay: `keploy test -c "docker compose up" --container-name ginMongoApp --delay 10`
+- Tests live in `keploy/`. Don't hand-edit them; re-record when a response changes on purpose.
+- Fields that change every run (timestamps, IDs) go under `assertions.noise`.
+```
+
+</Details>
+
+</div>
 
 </Grid>
+
+<Callout type="warning" title="Stay in the loop">
+  Read each command before approving it, and approve `sudo` one command at a time. Check `keploy/test-set-0/`
+  yourself afterwards.
+</Callout>
+
+<Callout type="info" title="Prefer to do it by hand?">
+  Steps 1 to 6 below walk through the same commands and explain what each one does. Worth a read even if your agent
+  ran them.
+</Callout>
 
 </Section>
 
@@ -258,80 +333,6 @@ hand-edit the YAML.
 </Section>
 
 </Grid>
-
-<Section id="ai-agents" icon="🤖" title="Let an AI agent do it" time="Claude Code, Codex or OpenCode">
-
-Everything above is a few shell commands, so a terminal coding agent can run it all. Pick one and watch:
-
-<Grid>
-
-<AgentDemo />
-
-<div className="space-y-5">
-
-Install yours and start it in the app folder:
-
-<Tabs labels={["Claude Code", "Codex", "OpenCode"]}>
-<Tab>
-
-```bash
-npm install -g @anthropic-ai/claude-code
-cd samples-go/gin-mongo && claude
-```
-
-</Tab>
-<Tab>
-
-```bash
-npm install -g @openai/codex   # the scoped package, not plain "codex"
-cd samples-go/gin-mongo && codex
-```
-
-</Tab>
-<Tab>
-
-```bash
-curl -fsSL https://opencode.ai/install | bash
-cd samples-go/gin-mongo && opencode
-```
-
-</Tab>
-</Tabs>
-
-Then paste:
-
-```text
-Install Keploy, record API tests for this Gin + Mongo app with docker compose,
-then replay them and tell me the result.
-```
-
-<Details title="Give your agent Keploy context with AGENTS.md">
-
-Codex and OpenCode read `AGENTS.md`; Claude Code reads `CLAUDE.md` (put `@AGENTS.md` in it to share one file).
-
-```md title="AGENTS.md"
-# Testing with Keploy
-
-- Install: `curl --silent -O -L https://keploy.io/install.sh && source install.sh`
-- Run `docker network create keploy-network` once (the compose file expects it).
-- Record: `keploy record -c "docker compose up" --container-name ginMongoApp`, then send real requests with curl.
-- Replay: `keploy test -c "docker compose up" --container-name ginMongoApp --delay 10`
-- Tests live in `keploy/`. Don't hand-edit them; re-record when a response changes on purpose.
-- Fields that change every run (timestamps, IDs) go under `assertions.noise`.
-```
-
-</Details>
-
-</div>
-
-</Grid>
-
-<Callout type="warning" title="Stay in the loop">
-  Read each command before approving it, and approve `sudo` one command at a time. Check `keploy/test-set-0/`
-  yourself afterwards.
-</Callout>
-
-</Section>
 
 <Section icon="🛟" title="Stuck?" time="Common problems">
 
