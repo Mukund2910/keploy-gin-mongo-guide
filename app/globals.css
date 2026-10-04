@@ -66,8 +66,8 @@ html {
   background: var(--paper);
 }
 
+/* No body background: html paints the page colour, so the fixed .backdrop (z -10) shows through. */
 body {
-  background: var(--paper);
   color: var(--ink);
 }
 
@@ -93,6 +93,13 @@ body {
 
   .doc > * + * {
     margin-top: 1.25rem;
+  }
+
+  /* Text keeps a readable measure; code, demos and cards use the full width */
+  .doc p,
+  .doc ul:not([class]),
+  .doc ol:not([class]) {
+    max-width: 72ch;
   }
 
   .doc h1,
@@ -345,14 +352,54 @@ body {
 }
 
 /* Page-load: title, dek and intro rise in sequence */
-.doc > h1 {
+.hero h1 {
   animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
-.doc > h1 + p {
+.hero h1 + p {
   animation: rise 0.7s 0.12s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
-.doc > h1 + p + p {
+.hero h1 + p + p {
   animation: rise 0.7s 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Margins: a faint dot grid that fades out behind the content, plus two slow-drifting orange glows */
+.backdrop .dots {
+  background-image: radial-gradient(circle at 1px 1px, color-mix(in oklab, var(--muted) 40%, transparent) 1.2px, transparent 0);
+  background-size: 26px 26px;
+  mask-image: linear-gradient(to right, black, transparent 22%, transparent 78%, black);
+}
+
+.backdrop .glow {
+  position: absolute;
+  width: 36rem;
+  height: 36rem;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.22;
+  background: radial-gradient(circle, var(--accent), transparent 70%);
+  animation: drift 18s ease-in-out infinite alternate;
+}
+
+.dark .backdrop .glow {
+  opacity: 0.12;
+}
+
+.backdrop .glow-left {
+  top: 10%;
+  left: -20rem;
+}
+
+.backdrop .glow-right {
+  bottom: 5%;
+  right: -20rem;
+  background: radial-gradient(circle, var(--accent-2), transparent 70%);
+  animation-delay: -9s;
+}
+
+@keyframes drift {
+  to {
+    transform: translate(6rem, 8rem) scale(1.15);
+  }
 }
 
 /* Collapsible panels slide their content in when opened */

@@ -94,8 +94,19 @@ export function Section({
           {time && <p className="mt-0.5 font-sans text-sm text-muted">{time}</p>}
         </div>
       </div>
-      <div className="space-y-5 sm:pl-16 [&>figure]:my-5!">{children}</div>
+      <div className="section-body space-y-5 sm:pl-16 [&>figure]:my-5!">{children}</div>
     </section>
+  );
+}
+
+/* Side-by-side layout on wide screens: pairs of sections, callouts, or a demo next to its instructions. */
+export function Grid({ children, wide }: { children: React.ReactNode; wide?: boolean }) {
+  return (
+    <div
+      className={`grid gap-x-12 gap-y-8 lg:grid-cols-2 [&>*]:my-0! [&_.section-body]:lg:pl-0 ${wide ? "my-20!" : "my-8!"}`}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -134,7 +145,7 @@ export function Glance({ steps }: { steps: { label: string; cmd: string }[] }) {
   return (
     <div className="my-12! rounded-2xl border border-rule bg-sunk/50 p-5 sm:p-6">
       <p className="mb-4 font-sans text-[0.95rem] font-semibold text-ink">The whole tutorial in {steps.length} commands</p>
-      <ol className="grid! list-none! gap-3 pl-0! sm:grid-cols-2">
+      <ol className="grid! list-none! gap-3 pl-0! sm:grid-cols-2 xl:grid-cols-4">
         {steps.map((s, i) => (
           <li
             key={s.cmd}

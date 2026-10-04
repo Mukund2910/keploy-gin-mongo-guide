@@ -1,15 +1,22 @@
 import { AgentDemo } from "@/components/agents";
 import { SessionDemo, Tabs, Tab } from "@/components/client";
-import { Callout, Details, FileTree, Glance, Pills, RecordReplayDiagram, Section, Wins } from "@/components/docs";
+import { Callout, Details, FileTree, Glance, Grid, Pills, RecordReplayDiagram, Section, Wins } from "@/components/docs";
+
+<div className="hero grid items-center gap-x-12 gap-y-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+<div className="space-y-5">
 
 # Your first Keploy tests in Go
 
 <p className="mt-4! font-sans text-[1.15rem] text-muted">Turn real API calls into tests. No test code, no database, about 15 minutes.</p>
 
 You'll take a small Gin + MongoDB URL shortener, hit it with two `curl` calls, and let **Keploy** turn that
-traffic into tests you can replay anywhere. Here's the whole idea, playing live:
+traffic into tests you can replay anywhere. Here's the whole idea, playing live.
+
+</div>
 
 <SessionDemo />
+
+</div>
 
 <Glance
   steps={[
@@ -41,6 +48,8 @@ network layer (eBPF on Linux), you don't add an SDK or change your code.
 
 <Pills items={["Docker", "Git", "Linux, macOS or Windows (WSL2)", "Go 1.22+ (only for the native path)"]} />
 
+<Grid>
+
 <Callout type="warning" title="On Windows? Use WSL2">
   Keploy's capture is built on Linux eBPF (kernel 5.10+). Run everything inside a WSL2 Ubuntu shell with Docker
   Desktop's WSL integration on.
@@ -50,7 +59,11 @@ network layer (eBPF on Linux), you don't add an SDK or change your code.
   Your agent can do every step for you. [Jump to the agent section](#ai-agents).
 </Callout>
 
+</Grid>
+
 </Section>
+
+<Grid wide>
 
 <Section n={1} title="Install Keploy" time="1 minute">
 
@@ -68,10 +81,11 @@ If you see a list of commands including `record` and `test`, you're set.
 ```bash
 git clone https://github.com/keploy/samples-go.git
 cd samples-go/gin-mongo
-rm -rf keploy   # start clean: the repo ships with pre-recorded tests
+rm -rf keploy   # start clean
 ```
 
-It's a URL shortener: `POST /url` stores a link in Mongo, `GET /:id` redirects to it.
+The last line removes the repo's pre-recorded tests. The app is a URL shortener: `POST /url` stores a link in Mongo,
+`GET /:id` redirects to it.
 
 <Details title="What's in the folder?">
 
@@ -89,6 +103,8 @@ gin-mongo/
 </Details>
 
 </Section>
+
+</Grid>
 
 <Section n={3} title="Record some tests" time="5 minutes">
 
@@ -185,6 +201,8 @@ assertions:
 
 </Section>
 
+<Grid wide>
+
 <Section n={5} title="Replay them" time="2 minutes">
 
 <Tabs labels={["Docker Compose", "Native (go run)"]}>
@@ -239,11 +257,17 @@ hand-edit the YAML.
 
 </Section>
 
+</Grid>
+
 <Section id="ai-agents" icon="🤖" title="Let an AI agent do it" time="Claude Code, Codex or OpenCode">
 
 Everything above is a few shell commands, so a terminal coding agent can run it all. Pick one and watch:
 
+<Grid>
+
 <AgentDemo />
+
+<div className="space-y-5">
 
 Install yours and start it in the app folder:
 
@@ -297,6 +321,10 @@ Codex and OpenCode read `AGENTS.md`; Claude Code reads `CLAUDE.md` (put `@AGENTS
 ```
 
 </Details>
+
+</div>
+
+</Grid>
 
 <Callout type="warning" title="Stay in the loop">
   Read each command before approving it, and approve `sudo` one command at a time. Check `keploy/test-set-0/`

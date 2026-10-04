@@ -33,7 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </a>
 
           <header className="sticky top-0 z-30 border-b border-rule bg-paper/80 backdrop-blur-md">
-            <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6">
+            <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:px-6 lg:px-10">
               <a href="#" className="group flex items-center gap-2.5 text-[0.95rem] font-semibold text-ink">
                 <span className="grid size-7 place-items-center rounded-lg bg-gradient-to-br from-orange-500 to-amber-400 text-sm text-white shadow-md shadow-orange-500/30 transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
                   K
@@ -54,13 +54,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <ReadingProgress />
           </header>
 
-          <main id="content" className="mx-auto max-w-3xl px-4 pb-28 pt-12 sm:px-6 lg:pt-20">
+          <div aria-hidden className="backdrop pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+            <div className="dots absolute inset-0" />
+            <div className="glow glow-left" />
+            <div className="glow glow-right" />
+          </div>
+
+          <main id="content" className="mx-auto max-w-6xl px-4 pb-28 pt-12 sm:px-6 lg:px-10 lg:pt-20">
             <article className="doc">{children}</article>
             <Reveal />
           </main>
 
           <footer className="border-t border-rule">
-            <div className="mx-auto max-w-3xl px-4 py-8 text-sm text-muted sm:px-6">
+            <div className="mx-auto max-w-6xl px-4 py-8 text-sm text-muted sm:px-6 lg:px-10">
               Built with Next.js and MDX. The sample app is{" "}
               <a className="text-accent underline underline-offset-2" href="https://github.com/keploy/samples-go/tree/main/gin-mongo" target="_blank" rel="noreferrer">
                 keploy/samples-go/gin-mongo

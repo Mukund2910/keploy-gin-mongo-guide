@@ -77,7 +77,7 @@ export function SessionDemo() {
 
   return (
     <figure
-      className="my-10! overflow-hidden rounded-xl border border-white/10 bg-term font-mono text-[0.8rem] leading-6 text-term-ink shadow-2xl shadow-orange-950/10 dark:shadow-black/40"
+      className="@container my-10! overflow-hidden rounded-xl border border-white/10 bg-term font-mono text-[0.8rem] leading-6 text-term-ink shadow-2xl shadow-orange-950/10 dark:shadow-black/40"
       style={{ animation: "rise 0.8s 0.35s cubic-bezier(0.2,0.7,0.2,1) both" }}
     >
       <div className="flex items-center gap-4 border-b border-white/10 px-4 py-2.5 font-sans text-[0.8rem]">
@@ -105,7 +105,7 @@ export function SessionDemo() {
         </button>
       </div>
 
-      <div className="grid md:grid-cols-[minmax(0,1fr)_13rem]">
+      <div className="grid @2xl:grid-cols-[minmax(0,1fr)_13rem]">
         <div className="min-h-[19rem] px-4 py-3" aria-live="polite">
           {visible.map((e, i) => (
             <div key={`${run}-${i}`} className="line-in -indent-4 whitespace-pre-wrap break-words pl-4">
@@ -123,7 +123,7 @@ export function SessionDemo() {
           {!done && <span className="caret inline-block h-4 w-2 translate-y-0.5 bg-orange-400" />}
         </div>
 
-        <div className="border-t border-white/10 px-4 py-3 md:border-l md:border-t-0">
+        <div className="border-t border-white/10 px-4 py-3 @2xl:border-l @2xl:border-t-0">
           <p className="mb-1 font-sans text-white/50">Files Keploy wrote</p>
           <div className={files.length ? "" : "text-white/30"}>keploy/test-set-0/</div>
           {files.length > 0 && (
